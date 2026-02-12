@@ -28,6 +28,9 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # tag image with short hash of build commit
           # and with commit tag
+          # no "latest" auto image tagging
+          flavor: |
+            latest=false
           tags: |
             type=ref,event=tag
             type=sha,format=short
