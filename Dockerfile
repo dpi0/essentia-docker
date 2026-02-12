@@ -31,13 +31,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-RUN git clone https://github.com/MTG/gaia.git \
-    && cd gaia \
+RUN git clone https://github.com/MTG/gaia.git gaia_src \
+    && cd gaia_src \
     && python3 waf configure \
     && python3 waf \
     && python3 waf install
 
-RUN git clone https://github.com/MTG/essentia.git . \
+RUN git clone https://github.com/MTG/essentia.git essentia_src \
+    && cd essentia_src \
     && python3 waf configure \
         --build-static \
         --with-python \
