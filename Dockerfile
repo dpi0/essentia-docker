@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     qtbase5-dev \
     libqt5sql5-sqlite \
     libqt5xml5 \
-    libqt5concurrent5-dev \
+    libqt5concurrent5 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -57,7 +57,7 @@ RUN mkdir -p /tmp/svm_models \
     && tar -xzf essentia-extractor-svm_models-v2.1_beta5.tar.gz -C /tmp/svm_models --strip-components=1 \
     && cd /tmp/svm_models \
     && printf "outputFormat: json\nhighlevel:\n  svm_models:\n" > profile.conf \
-    && for f in *.history; do printf "    - /usr/local/share/essentia/svm_models/%%s\n" "$f" >> profile.conf; done
+    && for f in *.history; do printf "    - /usr/local/share/essentia/svm_models/%s\n" "$f" >> profile.conf; done
 
 FROM ubuntu:24.04
 
@@ -95,4 +95,4 @@ ENV PYTHONPATH=/usr/local/lib/python3.12/dist-packages
 
 WORKDIR /workspace
 
-CMD ["python3", "-c", "import essentia.standard; print('Essentia loaded'); print('Gaia support:', 'MusicExtractorSVM' in essentia.standard.AlgorithmFactory.getAlgorithmNames())"]
+CMD ["python3", "-c", "import essentia.standard; print('Gaia support:', 'MusicExtractorSVM' in essentia.standard.AlgorithmFactory.getAlgorithmNames())"]
