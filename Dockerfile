@@ -83,6 +83,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libqt5xml5 \
     libqt5sql5 \
     libqt5sql5-sqlite \
+    libqt5concurrent5 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/local /usr/local
