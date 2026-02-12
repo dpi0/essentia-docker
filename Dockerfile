@@ -33,7 +33,7 @@ WORKDIR /app
 
 RUN git clone https://github.com/MTG/gaia.git \
     && cd gaia \
-    && python3 waf configure --with-python-bindings \
+    && python3 waf configure \
     && python3 waf \
     && python3 waf install
 
