@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     qtbase5-dev \
     libqt5sql5-sqlite \
     libqt5xml5 \
+    libqt5concurrent5-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -35,29 +36,28 @@ RUN git clone https://github.com/MTG/gaia.git gaia_src \
     && cd gaia_src \
     && python3 waf configure \
     && python3 waf \
-    && python3 waf install
+    && python3 waf install \
+    && ldconfig
 
 RUN git clone https://github.com/MTG/essentia.git essentia_src \
     && cd essentia_src \
-    && python3 waf configure \
+    && PKG_CONFIG_PATH=/usr/local/lib/pkgconfig python3 waf configure \
         --build-static \
         --with-python \
-        --with-cpptests \
         --with-examples \
         --with-vamp \
         --with-gaia \
         --pythondir=/usr/local/lib/python3.12/dist-packages \
     && python3 waf \
-    && python3 waf install
+    && python3 waf install \
+    && nm /usr/local/bin/essentia_streaming_extractor_music | grep -qi "Gaia"
 
 RUN mkdir -p /tmp/svm_models \
     && wget -q https://essentia.upf.edu/svm_models/essentia-extractor-svm_models-v2.1_beta5.tar.gz \
     && tar -xzf essentia-extractor-svm_models-v2.1_beta5.tar.gz -C /tmp/svm_models --strip-components=1 \
     && cd /tmp/svm_models \
-    && echo "outputFormat: json" > profile.conf \
-    && echo "highlevel:" >> profile.conf \
-    && echo "  svm_models:" >> profile.conf \
-    && for f in *.history; do echo "    - /usr/local/share/essentia/svm_models/$f" >> profile.conf; done
+    && printf "outputFormat: json\nhighlevel:\n  svm_models:\n" > profile.conf \
+    && for f in *.history; do printf "    - /usr/local/share/essentia/svm_models/%%s\n" "$f" >> profile.conf; done
 
 FROM ubuntu:24.04
 
@@ -95,4 +95,4 @@ ENV PYTHONPATH=/usr/local/lib/python3.12/dist-packages
 
 WORKDIR /workspace
 
-CMD ["python3", "-c", "import essentia; print(f'Essentia version: {essentia.__version__} installed successfully')"]
+CMD ["python3", "-c", "import essentia.standard; print('Essentia loaded'); print('Gaia support:', 'MusicExtractorSVM' in essentia.standard.AlgorithmFactory.getAlgorithmNames())"]
